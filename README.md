@@ -187,7 +187,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 ## Contact
 
-Sensorimotor Interaction Group - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
+Sensorimotor Interaction Group - [@sensintgroup](https://twitter.com/sensintgroup)
 
 Project Link: [https://github.com/sensint/Servo_Haptics](https://github.com/sensint/Servo_Haptics)
 
