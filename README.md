@@ -219,5 +219,5 @@ Project Link: [https://github.com/sensint/Servo_Haptics](https://github.com/sens
 [issues-shield]: https://img.shields.io/github/issues/sensint/Servo_Haptics.svg?style=for-the-badge
 [issues-url]: https://github.com/sensint/Servo_Haptics/issues
 [license-shield]: https://img.shields.io/github/license/sensint/Servo_Haptics.svg?style=for-the-badge
-[license-url]: https://github.com/sensint/Servo_Haptics/blob/master/LICENSE.txt
-[banner-image]: assets/img/banner_temp.png
+[license-url]: https://github.com/sensint/Servo_Haptics/blob/master/LICENSE
+[banner-image]: assets/img/banner_temp.PNG
