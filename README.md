@@ -21,7 +21,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/sensint/Servo_Haptics">
+  <a href="https://sensint.mpi-inf.mpg.de/">
     <img src="assets/img/sensint_logo.png" alt="Logo" width="121" height="100">
   </a>
 
@@ -183,7 +183,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 ## Contact
 
-Sensorimotor Interaction Group - [@sensintgroup](https://twitter.com/sensintgroup)
+Sensorimotor Interaction Group - [website](https://sensint.mpi-inf.mpg.de/) - [@sensintgroup](https://twitter.com/sensintgroup)
 
 Project Link: [https://github.com/sensint/Servo_Haptics](https://github.com/sensint/Servo_Haptics)
 
