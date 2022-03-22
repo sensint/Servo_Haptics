@@ -98,7 +98,6 @@ Download and install the [Teensyduino](https://www.pjrc.com/teensy/td_download.h
     2. select the correct serial port from `Tools -> Port`
 4. click the upload button (arrow) in the Teensyduino IDE
 
-
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
@@ -110,7 +109,6 @@ Download and install the [Teensyduino](https://www.pjrc.com/teensy/td_download.h
 
 ##### Build and Upload
 
-
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
@@ -119,7 +117,6 @@ Download and install the [Teensyduino](https://www.pjrc.com/teensy/td_download.h
 ### Hardware
 
 This project is based on the Teensy microcontroller and the [PT8211 Audio Kit](https://www.pjrc.com/store/pt8211_kit.html).
-
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -148,7 +145,6 @@ See the [open issues](https://github.com/sensint/Servo_Haptics/issues) for a ful
 ### Hardware
 
 - [ ] ...
-
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

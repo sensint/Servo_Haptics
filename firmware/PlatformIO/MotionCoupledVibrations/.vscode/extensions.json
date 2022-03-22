@@ -1,0 +1,15 @@
+{
+    // See http://go.microsoft.com/fwlink/?LinkId=827846
+    // for the documentation about the extensions.json format
+    "recommendations": [
+        "aaron-bond.better-comments",
+        "cschlosser.doxdocgen",
+        "eamodio.gitlens",
+        "gruntfuggly.todo-tree",
+        "platformio.platformio-ide",
+        "vivaxy.vscode-conventional-commits"
+    ],
+    "unwantedRecommendations": [
+        "ms-vscode.cpptools-extension-pack"
+    ]
+}
