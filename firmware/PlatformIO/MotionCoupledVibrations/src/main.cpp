@@ -12,6 +12,9 @@
 // debug messages are only available in the development build
 #include "debug.h"
 #endif  // SENSINT_DEVELOPMENT
+#ifdef SENSINT_BENCHMARK
+#include "benchmark.h"
+#endif  // SENSINT_BENCHMARK
 
 namespace {
 
@@ -25,7 +28,7 @@ AudioConnection patchCord2(signal, 0, to_haptuator, 1);
 float filtered_sensor_value = 0.f;
 
 //=========== control flow variables ===========
-uint32_t pulse_start_time = 0;
+elapsedMicros pulse_time_us = 0;
 bool is_vibrating = false;
 uint16_t last_bin_id = 0;
 uint16_t new_pulse_id = 0;
@@ -34,12 +37,15 @@ uint16_t current_pulse_id = 0;
 //=========== helper functions ===========
 // These functions were extracted to simplify the control flow and will be
 // inlined by the compiler.
+inline void SetupAudio() __attribute__((always_inline));
+inline void StartPulse() __attribute__((always_inline));
+inline void StopPulse() __attribute__((always_inline));
 
 /**
  * @brief set up the audio system
  *
  */
-inline void SetupAudio() {
+void SetupAudio() {
   AudioMemory(20);
   delay(50);  // time for DAC voltage stable
   signal.begin(sensint::settings::signal_generator_settings.waveform);
@@ -52,7 +58,7 @@ inline void SetupAudio() {
  *
  */
 inline void StartPulse() {
-  pulse_start_time = millis();
+  pulse_time_us = 0;
   signal.amplitude(sensint::settings::signal_generator_settings.amp_pos);
   is_vibrating = true;
 #ifdef SENSINT_DEBUG
@@ -81,18 +87,20 @@ inline void StopPulse() {
 void setup() {
   using namespace sensint;
 
-#ifdef SENSINT_DEVELOPMENT
   Serial.begin(config::kBaudRate);
 #ifdef SENSINT_DEBUG
   debug::Log(FW_NAME);
   debug::Log(GIT_TAG);
   debug::Log(GIT_REV);
 #endif  // SENSINT_DEBUG
-#endif  // SENSINT_DEVELOPMENT
 
   config::InitializePins();
   analogReadRes(settings::sensor_settings.resolution);
   SetupAudio();
+
+#ifdef SENSINT_BENCHMARK
+  benchmark::Initialize();
+#endif  // SENSINT_BENCHMARK
 }
 
 /**
@@ -134,7 +142,7 @@ void loop() {
     }
 
     // ******* #2 Check if Pulse is already vibrating *************************
-    // if its not vibrating, start a new pulse with a new ID
+    // if it's not vibrating, start a new pulse with a new ID
     if (!is_vibrating) {
       // current_pulse_id = new_pulse_id;
     }
@@ -150,15 +158,20 @@ void loop() {
       //! this is maybe too strict
       current_pulse_id = new_pulse_id;
       StartPulse();
+#ifdef SENSINT_BENCHMARK
+      benchmark::Start();
+#endif  // SENSINT_BENCHMARK
     }
 
     last_bin_id = mapped_bin_id;
   }
 
   if (is_vibrating) {
-    if (millis() >=
-        (pulse_start_time + settings::signal_generator_settings.duration_ms)) {
+    if (pulse_time_us >= settings::signal_generator_settings.duration_us) {
       StopPulse();
+#ifdef SENSINT_BENCHMARK
+      benchmark::Finish();
+#endif  // SENSINT_BENCHMARK
     }
   }
 }

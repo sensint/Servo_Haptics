@@ -16,6 +16,7 @@ namespace config {
 
 //=========== Pins ===========
 // used for pressure sensor
+// TODO: reset pin to A0 for release
 constexpr uint8_t kAnalogSensingPin = A2;
 // used for debugging and debounce condition
 constexpr uint8_t kLedPin = 13;

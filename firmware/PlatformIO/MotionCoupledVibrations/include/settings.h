@@ -45,7 +45,7 @@ static constexpr uint32_t kSensorMinValue = 0;
 
 //=========== signal generator ===========
 static constexpr uint16_t kNumberOfBins = 50;
-static constexpr uint32_t kSignalDurationMs = 10;
+static constexpr uint32_t kSignalDurationUs = 10;
 static constexpr short kSignalWaveform = static_cast<short>(Waveform::kSine);
 static constexpr float kSignalFreqencyHz = 100.f;
 static constexpr float kSignalAmpPos = 0.56f;
@@ -61,7 +61,7 @@ typedef struct {
 
 typedef struct {
   uint16_t number_of_bins = defaults::kNumberOfBins;
-  uint32_t duration_ms = defaults::kSignalDurationMs;
+  uint32_t duration_us = defaults::kSignalDurationUs;
   short waveform = defaults::kSignalWaveform;
   float frequency_hz = defaults::kSignalFreqencyHz;
   float amp_pos = defaults::kSignalAmpPos;
@@ -98,7 +98,7 @@ static void UpdateSettingsFromSerialInput() {
       break;
     }
     case 'd': {
-      signal_generator_settings.duration_ms = input.substring(1).toInt();
+      signal_generator_settings.duration_us = input.substring(1).toInt();
       break;
     }
     case 'e': {
