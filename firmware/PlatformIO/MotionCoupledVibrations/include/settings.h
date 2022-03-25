@@ -60,7 +60,7 @@ typedef struct {
 } SensorSettings;
 
 typedef struct {
-  uint16_t number_of_bins = defaults::kNumberOfBins;
+  uint16_t number_of_bins = defaults::kNumberOfBins - 1;
   uint32_t duration_us = defaults::kSignalDurationUs;
   short waveform = defaults::kSignalWaveform;
   float frequency_hz = defaults::kSignalFreqencyHz;
