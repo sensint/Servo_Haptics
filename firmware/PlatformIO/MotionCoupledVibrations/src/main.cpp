@@ -80,19 +80,25 @@ inline void StopPulse() {
 
 }  // namespace
 
-/**
- * @brief this function is called only once at the beginning of the program
- *
- */
 void setup() {
   using namespace sensint;
 
+#if defined(SENSINT_DEVELOPMENT) || defined(SENSINT_BENCHMARK)
+  while (!Serial && millis() < 5000)
+    ;
   Serial.begin(config::kBaudRate);
+  Serial.printf("\n\n================================================\n");
+  Serial.printf("Firmware: %s\n", FW_NAME);
+  Serial.printf(">>> version: %s\n", GIT_TAG);
+  Serial.printf(">>> revision: %s\n", GIT_REV);
 #ifdef SENSINT_DEBUG
-  debug::Log(FW_NAME);
-  debug::Log(GIT_TAG);
-  debug::Log(GIT_REV);
+  Serial.println(">>> debugging enabled");
 #endif  // SENSINT_DEBUG
+#ifdef SENSINT_BENCHMARK
+  Serial.println(">>> benchmarking enabled");
+#endif  // SENSINT_BENCHMARK
+  Serial.printf("================================================\n");
+#endif  // SENSINT_DEVELOPMENT || SENSINT_BENCHMARK
 
   config::InitializePins();
   analogReadRes(settings::sensor_settings.resolution);
@@ -103,10 +109,6 @@ void setup() {
 #endif  // SENSINT_BENCHMARK
 }
 
-/**
- * @brief this function is called repeatedly during the program
- *
- */
 void loop() {
   using namespace sensint;
 

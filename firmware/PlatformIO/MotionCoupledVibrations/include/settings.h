@@ -44,11 +44,13 @@ static constexpr uint32_t kSensorMaxValue = (1U << kSensorResolution) - 1;
 static constexpr uint32_t kSensorMinValue = 0;
 
 //=========== signal generator ===========
+// TODO: reset to default values from experimental setup
 static constexpr uint16_t kNumberOfBins = 50;
-static constexpr uint32_t kSignalDurationUs = 10;
-static constexpr short kSignalWaveform = static_cast<short>(Waveform::kSine);
+static constexpr uint32_t kSignalDurationUs = 10000;
+static constexpr short kSignalWaveform = static_cast<short>(
+    Waveform::kSquare);  // static_cast<short>(Waveform::kSine);
 static constexpr float kSignalFreqencyHz = 100.f;
-static constexpr float kSignalAmpPos = 0.56f;
+static constexpr float kSignalAmpPos = .2f;  // 0.56f;
 static constexpr float kSignalAmpNeg = 0.43f;
 }  // namespace defaults
 
