@@ -116,7 +116,7 @@ void loop() {
     /* Stop the time measurement as soon as the signal was recognized.
      */
 #ifdef USE_MICROS
-    uint32_t delta_time = micros() - time;
+    uint32_t delta_time = micros() - time - 7;
 #else
     uint32_t delta_cycles = ARM_DWT_CYCCNT - cycles - 2;
 #endif
