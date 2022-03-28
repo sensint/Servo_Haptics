@@ -66,7 +66,8 @@ namespace {
   uint32_t iteration = 0;
   
   // each iteration pauses for a given duration (blocking)
-  constexpr uint32_t kTriggerDelayMs = 100;
+  constexpr uint32_t kTriggerDelayMinMs = 1;
+  constexpr uint32_t kTriggerDelayMaxMs = 100;
 }
 
 void setup() {
@@ -135,8 +136,10 @@ void loop() {
     while (digitalReadFast(kTriggerInPin)) ;
 
     /* Wait a given time before we start the next iteration.
+     * We randomize the delay to account for unknown side effects.
      */
-    delay(kTriggerDelayMs);
+    delay(random(kTriggerDelayMinMs,kTriggerDelayMaxMs));
+    
     iteration++;
   } else {
     /* After running all iterations the firmware will stop, i.e. enter an infinite loop.
