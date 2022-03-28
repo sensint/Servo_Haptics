@@ -60,6 +60,7 @@ void SetupAudio() {
 inline void StartPulse() {
   pulse_time_us = 0;
   signal.amplitude(sensint::settings::signal_generator_settings.amp_pos);
+  signal.begin(sensint::settings::signal_generator_settings.waveform);
   is_vibrating = true;
 #ifdef SENSINT_DEBUG
   sensint::debug::Log("start pulse");
