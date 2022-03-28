@@ -34,6 +34,35 @@ uint16_t last_bin_id = 0;
 uint16_t new_pulse_id = 0;
 uint16_t current_pulse_id = 0;
 
+// #define SENSINT_ARB_WAVE
+#ifdef SENSINT_ARB_WAVE
+constexpr int16_t arb_wave_data[256] = {
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767, 32767,
+    32767, 32767, 32767};
+#endif  // SENSINT_ARB_WAVE
+
 //=========== helper functions ===========
 // These functions were extracted to simplify the control flow and will be
 // inlined by the compiler.
@@ -48,8 +77,16 @@ inline void StopPulse() __attribute__((always_inline));
 void SetupAudio() {
   AudioMemory(20);
   delay(50);  // time for DAC voltage stable
+#ifdef SENSINT_ARB_WAVE
+  signal.begin(0.f, 1.f,
+               static_cast<short>(sensint::settings::Waveform::kArbitrary));
+#else
   signal.begin(sensint::settings::signal_generator_settings.waveform);
   signal.frequency(sensint::settings::signal_generator_settings.frequency_hz);
+  // signal.begin(0.f,
+  // sensint::settings::signal_generator_settings.frequency_hz,
+  //              sensint::settings::signal_generator_settings.waveform);
+#endif  // SENSINT_ARB_WAVE
 }
 
 /**
@@ -59,8 +96,17 @@ void SetupAudio() {
  */
 void StartPulse() {
   pulse_time_us = 0;
-  signal.amplitude(sensint::settings::signal_generator_settings.amp_pos);
-  signal.begin(sensint::settings::signal_generator_settings.waveform);
+#ifdef SENSINT_ARB_WAVE
+  signal.begin(sensint::settings::signal_generator_settings.amp_pos, 1.f,
+               static_cast<short>(sensint::settings::Waveform::kArbitrary));
+  signal.arbitraryWaveform(arb_wave_data, 1.f);
+#else
+  signal.begin(sensint::settings::signal_generator_settings.amp_pos,
+               sensint::settings::signal_generator_settings.frequency_hz,
+               sensint::settings::signal_generator_settings.waveform);
+  // signal.amplitude(sensint::settings::signal_generator_settings.amp_pos);
+  // signal.begin(sensint::settings::signal_generator_settings.waveform);
+#endif  // SENSINT_ARB_WAVE
   is_vibrating = true;
 #ifdef SENSINT_DEBUG
   sensint::debug::Log("start pulse");
