@@ -57,7 +57,7 @@ void SetupAudio() {
  * value
  *
  */
-inline void StartPulse() {
+void StartPulse() {
   pulse_time_us = 0;
   signal.amplitude(sensint::settings::signal_generator_settings.amp_pos);
   signal.begin(sensint::settings::signal_generator_settings.waveform);
@@ -71,7 +71,7 @@ inline void StartPulse() {
  * @brief stop the pulse by setting the amplitude of the signal to zero
  *
  */
-inline void StopPulse() {
+void StopPulse() {
   signal.amplitude(0.f);
   is_vibrating = false;
 #ifdef SENSINT_DEBUG
