@@ -34,12 +34,24 @@ uint16_t last_bin_id = 0;
 uint16_t new_pulse_id = 0;
 uint16_t current_pulse_id = 0;
 
+//=========== servo variables ===========
+static constexpr int kMinServoPulseLength = 544;
+static constexpr int kMaxServoPulseLength = 2400;
+static constexpr int kMinServoAngle = 0;
+static constexpr int kMaxServoAngle = 180;
+volatile uint32_t servo_pulse_length = 0;
+volatile bool new_servo_angle = false;
+uint8_t servo_angle = 0;
+
 //=========== helper functions ===========
 // These functions were extracted to simplify the control flow and will be
 // inlined by the compiler.
 inline void SetupAudio() __attribute__((always_inline));
 inline void StartPulse() __attribute__((always_inline));
 inline void StopPulse() __attribute__((always_inline));
+
+void ServoPinRisingEdge();
+void ServoPinFallingEdge();
 
 /**
  * @brief set up the audio system
@@ -93,6 +105,28 @@ void StopPulse() {
 #endif  // SENSINT_DEBUG
 }
 
+/**
+ * @brief called when the servo pin reaches a rising edge
+ *
+ */
+void ServoPinRisingEdge() {
+  detachInterrupt(sensint::config::kServoInputPin);
+  servo_pulse_length = micros();
+  attachInterrupt(sensint::config::kServoInputPin, ServoPinFallingEdge,
+                  FALLING);
+}
+
+/**
+ * @brief called when the servo pin reaches a falling edge
+ *
+ */
+void ServoPinFallingEdge() {
+  detachInterrupt(sensint::config::kServoInputPin);
+  servo_pulse_length = micros() - servo_pulse_length;
+  new_servo_angle = true;
+  attachInterrupt(sensint::config::kServoInputPin, ServoPinRisingEdge, RISING);
+}
+
 }  // namespace
 
 void setup() {
@@ -119,6 +153,8 @@ void setup() {
   analogReadRes(settings::sensor_settings.resolution);
   SetupAudio();
 
+  attachInterrupt(config::kServoInputPin, StartPulse, RISING);
+
 #ifdef SENSINT_BENCHMARK
   benchmark::Initialize();
 #endif  // SENSINT_BENCHMARK
@@ -130,6 +166,16 @@ void loop() {
 #ifdef SENSINT_DEVELOPMENT
   settings::UpdateSettingsFromSerialInput();
 #endif  // SENSINT_DEVELOPMENT
+
+  if (new_servo_angle) {
+    servo_pulse_length = constrain(servo_pulse_length, kMinServoPulseLength,
+                                   kMaxServoPulseLength);
+    servo_angle =
+        (uint8_t)map(servo_pulse_length, kMinServoPulseLength,
+                     kMaxServoPulseLength, kMinServoAngle, kMaxServoAngle);
+    settings::UpdateSettingsFromLUTs(servo_angle);
+    new_servo_angle = false;
+  }
 
   // read the sensor value and filter it
   auto sensor_value = analogRead(config::kAnalogSensingPin);

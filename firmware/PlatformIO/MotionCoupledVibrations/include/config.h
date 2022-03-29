@@ -17,22 +17,19 @@ namespace config {
 //=========== Pins ===========
 // used for pressure sensor
 // TODO: reset pin to A0 for release
-constexpr uint8_t kAnalogSensingPin = A2;
-// used for debugging and debounce condition
-constexpr uint8_t kLedPin = 13;
+static constexpr uint8_t kAnalogSensingPin = A2;
+// used to set the Haptic Servo signal parameters based on a servo position
+static constexpr uint8_t kServoInputPin = 10;
 
 /**
  * @brief initialize the pins - this function should be called at least in
  * setup()
  *
  */
-static void InitializePins() {
-  pinMode(kAnalogSensingPin, INPUT);
-  pinMode(kLedPin, OUTPUT);
-}
+static void InitializePins() { pinMode(kAnalogSensingPin, INPUT); }
 
 // serial communication
-constexpr int kBaudRate = 115200;
+static constexpr int kBaudRate = 115200;
 
 }  // namespace config
 }  // namespace sensint
