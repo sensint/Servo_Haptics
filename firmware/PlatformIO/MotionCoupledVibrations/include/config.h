@@ -19,8 +19,7 @@ namespace config {
 // TODO: reset pin to A0 for release
 static constexpr uint8_t kAnalogSensingPin = A2;
 // used to set the Haptic Servo signal parameters based on a servo position
-// TODO: select a pin for release
-static constexpr uint8_t kServoInputPin = 10;
+static constexpr uint8_t kServoInputPin = 23;
 
 /**
  * @brief initialize the pins - this function should be called at least in
