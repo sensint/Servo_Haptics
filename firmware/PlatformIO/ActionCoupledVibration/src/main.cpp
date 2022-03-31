@@ -39,9 +39,11 @@ static constexpr int kMinServoPulseLength = 544;
 static constexpr int kMaxServoPulseLength = 2400;
 static constexpr int kMinServoAngle = 0;
 static constexpr int kMaxServoAngle = 180;
+elapsedMillis servo_timer_ms = 0;
 volatile uint32_t servo_pulse_length = 0;
-volatile bool new_servo_angle = false;
+volatile bool is_new_servo_pulse = false;
 uint8_t servo_angle = 0;
+uint8_t last_servo_angle = 255;
 
 //=========== helper functions ===========
 // These functions were extracted to simplify the control flow and will be
@@ -50,8 +52,8 @@ inline void SetupAudio() __attribute__((always_inline));
 inline void StartPulse() __attribute__((always_inline));
 inline void StopPulse() __attribute__((always_inline));
 
-void ServoPinRisingEdge();
-void ServoPinFallingEdge();
+inline void HandleServoPulse() __attribute__((always_inline));
+void ServoPinChangingEdge();
 
 /**
  * @brief set up the audio system
@@ -105,26 +107,31 @@ void StopPulse() {
 #endif  // SENSINT_DEBUG
 }
 
-/**
- * @brief called when the servo pin reaches a rising edge
- *
- */
-void ServoPinRisingEdge() {
-  detachInterrupt(sensint::config::kServoInputPin);
-  servo_pulse_length = micros();
-  attachInterrupt(sensint::config::kServoInputPin, ServoPinFallingEdge,
-                  FALLING);
+void ServoPinChangingEdge() {
+  if (digitalReadFast(sensint::config::kServoInputPin)) {
+    is_new_servo_pulse = false;
+    servo_pulse_length = micros();
+  } else {
+    servo_pulse_length = micros() - servo_pulse_length;
+    is_new_servo_pulse = true;
+  }
 }
 
-/**
- * @brief called when the servo pin reaches a falling edge
- *
- */
-void ServoPinFallingEdge() {
-  detachInterrupt(sensint::config::kServoInputPin);
-  servo_pulse_length = micros() - servo_pulse_length;
-  new_servo_angle = true;
-  attachInterrupt(sensint::config::kServoInputPin, ServoPinRisingEdge, RISING);
+void HandleServoPulse() {
+  if (servo_pulse_length >= kMinServoPulseLength &&
+      servo_pulse_length <= kMaxServoPulseLength) {
+    servo_angle =
+        (uint8_t)map(servo_pulse_length, kMinServoPulseLength,
+                     kMaxServoPulseLength, kMinServoAngle, kMaxServoAngle);
+    if (servo_angle != last_servo_angle) {
+      sensint::settings::UpdateSettingsFromLUTs(servo_angle);
+      last_servo_angle = servo_angle;
+#ifdef SENSINT_DEBUG
+      sensint::debug::Log("servo angle " + String((int)servo_angle),
+                          sensint::debug::DebugLevel::verbose);
+#endif  // SENSINT_DEBUG
+    }
+  }
 }
 
 }  // namespace
@@ -153,7 +160,8 @@ void setup() {
   analogReadRes(settings::sensor_settings.resolution);
   SetupAudio();
 
-  attachInterrupt(config::kServoInputPin, StartPulse, RISING);
+  // attachInterrupt(config::kServoInputPin, ServoPinRisingEdge, RISING);
+  attachInterrupt(config::kServoInputPin, ServoPinChangingEdge, CHANGE);
 
 #ifdef SENSINT_BENCHMARK
   benchmark::Initialize();
@@ -167,14 +175,10 @@ void loop() {
   settings::UpdateSettingsFromSerialInput();
 #endif  // SENSINT_DEVELOPMENT
 
-  if (new_servo_angle) {
-    servo_pulse_length = constrain(servo_pulse_length, kMinServoPulseLength,
-                                   kMaxServoPulseLength);
-    servo_angle =
-        (uint8_t)map(servo_pulse_length, kMinServoPulseLength,
-                     kMaxServoPulseLength, kMinServoAngle, kMaxServoAngle);
-    settings::UpdateSettingsFromLUTs(servo_angle);
-    new_servo_angle = false;
+  if (is_new_servo_pulse &&
+      servo_timer_ms > settings::defaults::kServoDelayMs) {
+    HandleServoPulse();
+    servo_timer_ms = 0;
   }
 
   // read the sensor value and filter it

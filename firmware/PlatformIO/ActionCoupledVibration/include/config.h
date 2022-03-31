@@ -16,10 +16,10 @@ namespace config {
 
 //=========== Pins ===========
 // used for pressure sensor
-// TODO: reset pin to A0 for release
-static constexpr uint8_t kAnalogSensingPin = A2;
+static constexpr uint8_t kAnalogSensingPin = A0;
 // used to set the Haptic Servo signal parameters based on a servo position
-static constexpr uint8_t kServoInputPin = 23;
+// TODO: double check the pin number for the release
+static constexpr uint8_t kServoInputPin = 17;
 
 /**
  * @brief initialize the pins - this function should be called at least in
