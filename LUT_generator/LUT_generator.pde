@@ -17,8 +17,8 @@ enum Function {
 ********************************************************************/
 
 //====== function configuration ======
-final Waveform waveForm = Waveform.Triangle;
-final Function function = Function.Continuous;
+final Waveform waveForm = Waveform.Sawtooth;
+final Function function = Function.Step;
 
 
 //====== these parameters are available for the Haptic Servo ======
@@ -28,12 +28,12 @@ final int binMax = 100;
 final float freqMin = 10.0;
 final float freqMax = 300.0;
 // this variables are only used in StepsPerStep
-final int binLevels = 12;
-final int freqLevels = 8;
+final int binLevels = 7;
+final int freqLevels = 3;
 // this variable is only used in Continuous
 final int periodeSteps = 6;
 // this variable is only used in Step
-final int steps = 10;
+final int steps = 5;
 
 
 
@@ -123,7 +123,11 @@ void calcAndDrawStepsPerStep() {
   float lastBinX = binX;
   float lastBinY = binY;
   
-  final float freqYstep = guiCanvasHeight / (freqLevels-1);
+  final float periode = (waveForm == Waveform.Triangle || waveForm == Waveform.TriangleInverse) ? (binsPerStep/2) : binsPerStep;
+  final float periode2 = 2 * periode;
+  final float amplitude = (guiCanvasHeight / periode);
+  //final float freqYstep = guiCanvasHeight / (freqLevels-1); // !For old implementation!
+  final float freqYstep = (waveForm == Waveform.Triangle || waveForm == Waveform.TriangleInverse) ? (binsPerStep/(freqLevels*2)) : binsPerStep/freqLevels;
   float freqX = 0;
   float freqY = guiCanvasHeight;
   float lastFreqX = freqX;
@@ -132,11 +136,21 @@ void calcAndDrawStepsPerStep() {
   for (int idx = 0; idx < dataSize; idx++) {
     //====== draw frequency graph (sawtooth function) ====== 
     freqX = idx * xStep;
+    
+    // !THIS DOESN'T WORK WELL
+    if (idx%(int(0.5+freqYstep)) == 0) {
+      freqY = calcYforIndexInWave(idx, waveForm, periode, periode2, amplitude);
+    }
+    
+    // old implementation that works slightly better but only generates sawtooth
+    /*
     if (idx%(int(0.5+(binsPerStep))) == 0) {
       freqY = guiCanvasHeight;
     } else  {
       freqY -= (idx%(int(0.5+(binsPerStep/freqLevels))) != 0) ? 0 : freqYstep;
     }
+    */
+    
     strokeWeight(1);
     stroke(guiFrequencyColor);
     line(lastFreqX, lastFreqY, freqX, freqY);
@@ -183,20 +197,7 @@ void calcAndDrawContinuous() {
   for (int idx = 0; idx < dataSize; idx++) {
     //====== draw frequency graph ====== 
     freqX = idx * xStep;
-    switch(waveForm) {
-      case Triangle:
-        freqY = (periode - abs((idx % periode2) - periode)) * amplitude;
-        break;
-      case TriangleInverse:
-        freqY = (abs((idx % periode2) - periode)) * amplitude;
-        break;
-      case Sawtooth:
-        freqY = (abs((idx % periode) - periode)) * amplitude;
-        break;
-      case SawtoothInverse:      
-        freqY = (periode - abs((idx % periode) - periode)) * amplitude;
-        break;
-    }
+    freqY = calcYforIndexInWave(idx, waveForm, periode, periode2, amplitude);
     strokeWeight(1);
     stroke(guiFrequencyColor);
     line(lastFreqX, lastFreqY, freqX, freqY);
@@ -244,20 +245,7 @@ void calcAndDrawStep() {
   for (int idx = 0; idx < dataSize; idx++) {
     //====== draw frequency graph ====== 
     freqX = idx * xStep;
-    switch(waveForm) {
-      case Triangle:
-        freqY = (periode - abs((idx % periode2) - periode)) * amplitude;
-        break;
-      case TriangleInverse:
-        freqY = (abs((idx % periode2) - periode)) * amplitude;
-        break;
-      case Sawtooth:
-        freqY = (abs((idx % periode) - periode)) * amplitude;
-        break;
-      case SawtoothInverse:      
-        freqY = (periode - abs((idx % periode) - periode)) * amplitude;
-        break;
-    }
+    freqY = calcYforIndexInWave(idx, waveForm, periode, periode2, amplitude);
     strokeWeight(1);
     stroke(guiFrequencyColor);
     line(lastFreqX, lastFreqY, freqX, freqY);
@@ -284,6 +272,26 @@ void calcAndDrawStep() {
     freqData[idx] = round(map(freqY, 0, guiCanvasHeight, freqMax, freqMin));
     binData[idx] = (int)(0.5+map(binY, 0, guiCanvasHeight, binMax, binMin));
   }
+}
+
+
+float calcYforIndexInWave(int idx, Waveform wave, float periode, float periode2, float amplitude) {
+  float y = 0.0;
+  switch(wave) {
+    case Triangle:
+      y = (periode - abs((idx % periode2) - periode)) * amplitude;
+      break;
+    case TriangleInverse:
+      y = (abs((idx % periode2) - periode)) * amplitude;
+      break;
+    case Sawtooth:
+      y = (abs((idx % periode) - periode)) * amplitude;
+      break;
+    case SawtoothInverse:      
+      y = (periode - abs((idx % periode) - periode)) * amplitude;
+      break;
+  }
+  return y;
 }
 
 
