@@ -160,7 +160,6 @@ void setup() {
   analogReadRes(settings::sensor_settings.resolution);
   SetupAudio();
 
-  // attachInterrupt(config::kServoInputPin, ServoPinRisingEdge, RISING);
   attachInterrupt(config::kServoInputPin, ServoPinChangingEdge, CHANGE);
 
 #ifdef SENSINT_BENCHMARK

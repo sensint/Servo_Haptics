@@ -43,9 +43,8 @@ static constexpr uint8_t kMaxIndex = kSize - 1;
 
 /**
  * @brief Lookup table for the servo angle to number of bins conversion.
- * The values are created by the LUT-generator (Processing) with the following
- * parameters: [function: calcAndDrawSawtoothPerStep binMin: 10 binMax: 100
- * binLevels = 12]
+ * The values are created by the LUTgenerator (Processing) with the following
+ * parameters: [ binMin: 10 binMax: 100 binLevels: 12]
  */
 static constexpr uint16_t kNumberOfBins[] = {
     10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,
@@ -64,9 +63,8 @@ static constexpr uint16_t kNumberOfBins[] = {
 
 /**
  * @brief Lookup table for the servo angle to frequency conversion.
- * The values are created by the LUT-generator (Processing) with the following
- * parameters: [function: calcAndDrawSawtoothPerStep freqMin: 10.0 freqMax:
- * 300.0 freqLevels: 8]
+ * The values are created by the LUTgenerator (Processing) with the following
+ * parameters: [ freqMin: 10.0 freqMax: 300.0 freqLevels: 8]
  */
 static constexpr float kFrequencies[] = {
     10.0,  10.0,  51.0,  51.0,  93.0,  93.0,  134.0, 134.0, 176.0, 176.0, 217.0,
