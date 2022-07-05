@@ -1,0 +1,248 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Text GLabel 6416 4234 2    50   Input ~ 0
+ServoVCC
+$Comp
+L teensy:PAM8403Amp PAM8403Amp
+U 1 1 6250C202
+P 4392 4175
+F 0 "PAM8403Amp" H 4398 3295 50  0000 C CNN
+F 1 "PAM8403Amp" H 4392 3111 50  0001 C CNN
+F 2 "" H 4392 3125 50  0001 C CNN
+F 3 "" H 4392 3125 50  0001 C CNN
+	1    4392 4175
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 6250D39F
+P 8423 2102
+F 0 "#PWR?" H 8423 1852 50  0001 C CNN
+F 1 "GND" H 8428 1929 50  0000 C CNN
+F 2 "" H 8423 2102 50  0001 C CNN
+F 3 "" H 8423 2102 50  0001 C CNN
+	1    8423 2102
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 6250E3D8
+P 8423 2102
+F 0 "#PWR?" H 8423 1852 50  0001 C CNN
+F 1 "GND" H 8428 1929 50  0000 C CNN
+F 2 "" H 8423 2102 50  0001 C CNN
+F 3 "" H 8423 2102 50  0001 C CNN
+	1    8423 2102
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 6250E4F3
+P 3887 4776
+F 0 "#PWR?" H 3887 4526 50  0001 C CNN
+F 1 "GND" H 3892 4603 50  0000 C CNN
+F 2 "" H 3887 4776 50  0001 C CNN
+F 3 "" H 3887 4776 50  0001 C CNN
+	1    3887 4776
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 6250E4FD
+P 8933 5457
+F 0 "#PWR?" H 8933 5207 50  0001 C CNN
+F 1 "GND" H 8938 5284 50  0000 C CNN
+F 2 "" H 8933 5457 50  0001 C CNN
+F 3 "" H 8933 5457 50  0001 C CNN
+	1    8933 5457
+	1    0    0    -1  
+$EndComp
+Text GLabel 3790 4675 0    50   Input ~ 0
+Actuator
+$Comp
+L teensy:PT8211 PT8211
+U 1 1 6250A227
+P 5106 4425
+F 0 "PT8211" H 5352 3958 50  0000 L CNN
+F 1 "PT8211" H 5984 4130 50  0001 L CNN
+F 2 "" H 5456 4425 50  0001 C CNN
+F 3 "" H 5456 4425 50  0001 C CNN
+	1    5106 4425
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4792 4625 4856 4625
+Wire Wire Line
+	4856 4725 4856 4825
+Wire Wire Line
+	4856 4825 4792 4825
+Wire Wire Line
+	3790 4675 3992 4675
+Wire Wire Line
+	3992 4775 3887 4775
+Wire Wire Line
+	3887 4775 3887 4776
+Wire Wire Line
+	5940 2190 5940 2276
+Text Notes 3434 4593 0    50   ~ 0
+Audio Out
+Text Notes 6455 4401 0    50   ~ 0
+Analog In
+Wire Wire Line
+	7477 2284 7477 2011
+Wire Wire Line
+	7477 2011 7277 2011
+Wire Wire Line
+	7928 2547 7928 2401
+Wire Wire Line
+	7377 2284 7377 2127
+Wire Wire Line
+	7377 2127 7277 2127
+Wire Wire Line
+	6897 2127 6897 2011
+NoConn ~ 6897 2011
+Text GLabel 3759 3969 0    50   Input ~ 0
+V_In
+$Comp
+L power:GND #PWR?
+U 1 1 625207C3
+P 3762 4062
+F 0 "#PWR?" H 3762 3812 50  0001 C CNN
+F 1 "GND" H 3767 3889 50  0000 C CNN
+F 2 "" H 3762 4062 50  0001 C CNN
+F 3 "" H 3762 4062 50  0001 C CNN
+	1    3762 4062
+	1    0    0    -1  
+$EndComp
+Text Notes 3562 3889 0    50   ~ 0
+Power Supply
+$Comp
+L power:GND #PWR?
+U 1 1 62524E5E
+P 5256 4925
+F 0 "#PWR?" H 5256 4675 50  0001 C CNN
+F 1 "GND" H 5261 4752 50  0000 C CNN
+F 2 "" H 5256 4925 50  0001 C CNN
+F 3 "" H 5256 4925 50  0001 C CNN
+	1    5256 4925
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7277 2284 7277 2127
+Wire Wire Line
+	7976 3059 7896 3059
+NoConn ~ 7277 2127
+NoConn ~ 7277 2011
+Wire Wire Line
+	5940 2190 7367 2190
+Wire Wire Line
+	7367 2190 7367 3980
+Wire Wire Line
+	7163 2591 7810 2591
+Wire Wire Line
+	6056 4234 6416 4234
+Wire Wire Line
+	6623 1799 6389 1799
+Text GLabel 6623 4120 2    50   Input ~ 0
+ADC
+Wire Wire Line
+	7056 2946 7056 2276
+Wire Wire Line
+	7056 2276 5940 2276
+Wire Wire Line
+	6365 2216 6365 2301
+NoConn ~ 5940 2276
+Wire Wire Line
+	3762 4062 4292 4062
+Wire Wire Line
+	4292 4062 4292 4275
+Wire Wire Line
+	3759 3969 4492 3969
+Wire Wire Line
+	4492 3969 4492 4275
+Connection ~ 5940 2276
+Wire Wire Line
+	5940 2276 5940 2361
+Wire Wire Line
+	5940 2276 5540 2276
+Connection ~ 6897 2011
+Wire Wire Line
+	6897 2011 6697 2011
+Wire Wire Line
+	6897 2011 6897 1865
+Connection ~ 7277 2011
+Wire Wire Line
+	7277 2011 6897 2011
+Wire Wire Line
+	7277 2011 7277 1865
+Connection ~ 7277 2127
+Wire Wire Line
+	7277 2127 6897 2127
+Wire Wire Line
+	7277 2127 7277 2011
+Wire Wire Line
+	5506 4425 5506 4234
+$Comp
+L teensy:Teensy3.5_ Teensy3.5
+U 1 1 6254465F
+P 6256 3784
+F 0 "Teensy3.5" V 6206 2091 50  0000 L CNN
+F 1 "Teensy3.5_" V 6311 3711 50  0001 L CNN
+F 2 "" H 6256 3784 50  0001 C CNN
+F 3 "" H 6256 3784 50  0001 C CNN
+	1    6256 3784
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	5306 4235 5306 4272
+Wire Wire Line
+	5306 4272 5606 4272
+Wire Wire Line
+	5606 4272 5606 4425
+Wire Wire Line
+	5806 4234 5806 4425
+NoConn ~ 5506 4272
+Wire Wire Line
+	5506 3534 5506 3433
+Wire Wire Line
+	5506 3433 6901 3433
+Wire Wire Line
+	6901 3433 6901 4925
+Wire Wire Line
+	6901 4925 5906 4925
+Wire Wire Line
+	6623 4120 6623 3392
+Wire Wire Line
+	6623 3392 5106 3392
+Wire Wire Line
+	5106 3392 5106 3534
+Wire Wire Line
+	6056 3533 6267 3533
+Wire Wire Line
+	7643 2464 7643 2363
+$Comp
+L power:GND #PWR?
+U 1 1 6252C237
+P 6267 3533
+F 0 "#PWR?" H 6267 3283 50  0001 C CNN
+F 1 "GND" H 6272 3360 50  0000 C CNN
+F 2 "" H 6267 3533 50  0001 C CNN
+F 3 "" H 6267 3533 50  0001 C CNN
+	1    6267 3533
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6623 3433
+$EndSCHEMATC

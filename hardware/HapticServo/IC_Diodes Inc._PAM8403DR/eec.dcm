@@ -1,0 +1,7 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP PAM8403DR
+D PAM8403DR
+F https://www.diodes.com/assets/Datasheets/PAM8403.pdf
+$ENDCMP
+# end doc library
