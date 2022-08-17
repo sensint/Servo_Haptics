@@ -1,8 +1,12 @@
-//=========== system headers ===========
-#include <Arduino.h>
-
-//=========== library headers ===========
 #include <Audio.h>
+#include <Wire.h>
+#include <cmath>
+
+
+#define VERSION "v1.0.0"
+
+// uncomment to enable printing debug information to the serial port
+#define DEBUG
 
 
 namespace defaults {
@@ -29,22 +33,25 @@ enum class Waveform : short {
 };
 
 //=========== signal generator ===========
-static constexpr uint16_t kNumberOfBins = 50;
+static constexpr uint16_t kNumberOfBins = 20;
 static constexpr uint32_t kSignalDurationUs = 10000;
 static constexpr short kSignalWaveform = static_cast<short>(Waveform::kSine);
-static constexpr float kSignalFreqencyHz = 100.f;
-static constexpr float kSignalAmpPos = 0.56f;
-static constexpr float kSignalAmpNeg = 0.43f;
+static constexpr float kSignalFreqencyHz = 150.f;
+static constexpr float kSignalAmp = 1.f;
 
 //=========== sensor ===========
-static constexpr float kFilterWeight = 0.2;
+static constexpr uint8_t kAnalogSensingPin = A1;
+static constexpr float kFilterWeight = 0.05;
 static constexpr uint8_t kSensorResolution = 10;
 static constexpr uint32_t kSensorMaxValue = (1U << kSensorResolution) - 1;
 static constexpr uint32_t kSensorMinValue = 0;
-static constexpr uint8_t kAnalogSensingPin = A0;
+static constexpr uint32_t kSensorJitterThreshold = 10;
 
 //=========== serial ===========
 static constexpr int kBaudRate = 115200;
+
+//=========== I2C ===========
+static constexpr uint8_t kI2CAddress = 20;
 
 //=========== servo ===========
 static constexpr uint32_t kServoDelayMs = 20;
@@ -122,20 +129,25 @@ typedef struct {
   uint32_t duration_us = defaults::kSignalDurationUs;
   short waveform = defaults::kSignalWaveform;
   float frequency_hz = defaults::kSignalFreqencyHz;
-  float amp_pos = defaults::kSignalAmpPos;
-  float amp_neg = defaults::kSignalAmpNeg;
+  float amp = defaults::kSignalAmp;
 } SignalGeneratorSettings;
+
+union SerializableSignalGeneratorSettings {
+  SignalGeneratorSettings data;
+  uint8_t serialized[sizeof(SignalGeneratorSettings)];
+};
 
 //=========== settings instances ===========
 // These instances are used to access the settings in the main code.
 SensorSettings sensor_settings;
 SignalGeneratorSettings signal_generator_settings;
+union SerializableSignalGeneratorSettings signal_generator_settings_serialized = { .data = signal_generator_settings };
 
 //=========== audio variables ===========
 AudioSynthWaveform signal;
-AudioOutputPT8211 to_haptuator;
-AudioConnection patchCord1(signal, 0, to_haptuator, 0);
-AudioConnection patchCord2(signal, 0, to_haptuator, 1);
+AudioOutputPT8211 dac;
+AudioConnection patchCord1(signal, 0, dac, 0);
+AudioConnection patchCord2(signal, 0, dac, 1);
 
 //=========== sensor variables ===========
 float filtered_sensor_value = 0.f;
@@ -144,8 +156,6 @@ float filtered_sensor_value = 0.f;
 elapsedMicros pulse_time_us = 0;
 bool is_vibrating = false;
 uint16_t last_bin_id = 0;
-uint16_t new_pulse_id = 0;
-uint16_t current_pulse_id = 0;
 
 //=========== servo variables ===========
 static constexpr int kMinServoPulseLength = 544;
@@ -161,12 +171,24 @@ uint8_t last_servo_angle = 255;
 //=========== helper functions ===========
 // These functions were extracted to simplify the control flow and will be
 // inlined by the compiler.
+inline void SetupSerial() __attribute__((always_inline));
 inline void SetupAudio() __attribute__((always_inline));
+inline void SetupSensor() __attribute__((always_inline));
+inline void SetupI2C() __attribute__((always_inline));
+inline void SetupServo() __attribute__((always_inline));
 inline void StartPulse() __attribute__((always_inline));
 inline void StopPulse() __attribute__((always_inline));
 inline void HandleServoPulse() __attribute__((always_inline));
+inline void ApplyHardwareFix() __attribute__((always_inline));
 void ServoPinChangingEdge();
 void UpdateSettingsFromLUTs(uint8_t index);
+void HandleI2COnReceive(int number_of_bytes);
+
+void SetupSerial() {
+  while (!Serial && millis() < 5000)
+    ;
+  Serial.begin(defaults::kBaudRate);
+}
 
 /**
  * @brief set up the audio system
@@ -179,16 +201,53 @@ void SetupAudio() {
   signal.frequency(signal_generator_settings.frequency_hz);
 }
 
+void SetupSensor() {
+  pinMode(defaults::kAnalogSensingPin, INPUT);
+  
+  analogReadRes(sensor_settings.resolution);
+#ifdef DEBUG
+  Serial.printf(">>> Set up analog sensor \n\t pin: %d \n\t res: %d bit \n\t range: [%d, %d]\n",
+                (int)defaults::kAnalogSensingPin,
+                (int)sensor_settings.resolution,
+                (int)sensor_settings.min_value,
+                (int)sensor_settings.max_value);
+#endif
+}
+
+void SetupI2C() {
+  Wire.begin(defaults::kI2CAddress);
+  Wire.onReceive(HandleI2COnReceive);
+#ifdef DEBUG
+  Serial.printf(">>> Set up I2C \n\t addr: %d \n", (int)defaults::kI2CAddress);
+#endif
+}
+
+void SetupServo() {
+  pinMode(defaults::kServoInputPin, INPUT_PULLUP);
+  attachInterrupt(defaults::kServoInputPin, ServoPinChangingEdge, CHANGE);
+#ifdef DEBUG
+  Serial.printf(">>> Set up servo \n\t pin: %d \n", (int)defaults::kServoInputPin);
+#endif
+}
+
 /**
  * @brief start a pulse by setting the amplitude of the signal to a predefined
  * value
  *
  */
 void StartPulse() {
-  pulse_time_us = 0;
-  signal.amplitude(signal_generator_settings.amp_pos);
   signal.begin(signal_generator_settings.waveform);
+  signal.frequency(signal_generator_settings.frequency_hz);
+  signal.amplitude(signal_generator_settings.amp);
+  pulse_time_us = 0;
   is_vibrating = true;
+#ifdef DEBUG
+  Serial.printf(">>> Start pulse \n\t wave: %d \n\t amp: %.2f \n\t freq: %.2f Hz \n\t dur: %d µs\n",
+                (int)signal_generator_settings.waveform,
+                signal_generator_settings.amp,
+                signal_generator_settings.frequency_hz,
+                (int)signal_generator_settings.duration_us);
+#endif
 }
 
 /**
@@ -198,6 +257,9 @@ void StartPulse() {
 void StopPulse() {
   signal.amplitude(0.f);
   is_vibrating = false;
+#ifdef DEBUG
+  Serial.println(F(">>> Stop pulse"));
+#endif
 }
 
 void ServoPinChangingEdge() {
@@ -216,6 +278,9 @@ void HandleServoPulse() {
     servo_angle = (uint8_t)map(servo_pulse_length, kMinServoPulseLength,
                     kMaxServoPulseLength, kMinServoAngle, kMaxServoAngle);
     if (servo_angle != last_servo_angle) {
+#ifdef DEBUG
+      Serial.printf(">>> New servo angle \n\t angle: %d \n", (int)servo_angle);
+#endif
       UpdateSettingsFromLUTs(servo_angle);
       last_servo_angle = servo_angle;
     }
@@ -235,83 +300,121 @@ void UpdateSettingsFromLUTs(uint8_t index) {
   }
   signal_generator_settings.number_of_bins = lut::kNumberOfBins[index];
   signal_generator_settings.frequency_hz = lut::kFrequencies[index];
+#ifdef DEBUG
+  Serial.printf(">>> Update settings from LUTs \n\t number of bins: %d \n\t frequency: %.2f \n", 
+                (int) signal_generator_settings.number_of_bins,
+                signal_generator_settings.frequency_hz);
+#endif
+}
+
+
+void HandleI2COnReceive(int number_of_bytes) {
+  int idx = 0;
+  while (Wire.available()) {
+    signal_generator_settings_serialized.serialized[idx] = Wire.read();
+    idx++;
+  }
+  if (idx == (sizeof(SignalGeneratorSettings)-1)) {
+    signal_generator_settings = signal_generator_settings_serialized.data;
+  }
+}
+
+//! This should be removed for the next PCB version!
+void ApplyHardwareFix() {
+  pinMode(A2,OUTPUT);
+  digitalWrite(A2, HIGH);
+  pinMode(2,OUTPUT);
+  digitalWrite(2, LOW);
 }
 
 }  // namespace
 
-
 void setup() {
-  // initialize the serial communication
-  while (!Serial && millis() < 5000)
-    ;
-  Serial.begin(defaults::kBaudRate);
+  SetupSerial();
+  
+#ifdef DEBUG
+  Serial.printf("HAPTIC SERVO (%s)\n\n", VERSION);
+  Serial.println(F("======================= SETUP ======================="));
+#endif
 
-  // initialize the audio processing
+  SetupI2C();
   SetupAudio();
+  SetupSensor();
+  SetupServo();
 
-  // initialize the sensor
-  pinMode(defaults::kAnalogSensingPin, INPUT);
-  analogReadRes(sensor_settings.resolution);
+  //! This should be removed for the next PCB version!
+  ApplyHardwareFix();
 
-  // initialize the servo
-  pinMode(defaults::kServoInputPin, INPUT_PULLDOWN);
-  attachInterrupt(defaults::kServoInputPin, ServoPinChangingEdge, CHANGE);
+  // initialize the system assuming the servo being at 0°
+  signal_generator_settings.number_of_bins = lut::kNumberOfBins[0];
+  signal_generator_settings.frequency_hz = lut::kFrequencies[0];
+
+#ifdef DEBUG
+  Serial.printf(">>> Signal generator settings \n\t bins: %d \n\t wave: %d \n\t amp: %.2f \n\t freq: %.2f Hz \n\t dur: %d µs\n",
+                (int)signal_generator_settings.number_of_bins,
+                (int)signal_generator_settings.waveform,
+                signal_generator_settings.amp,
+                signal_generator_settings.frequency_hz,
+                (int)signal_generator_settings.duration_us);
+  Serial.println(F("=====================================================\n\n"));
+#endif
+
+  delay(500);
 }
 
 
+
 void loop() {
+  //! This is for testing only!
+  /*
+  static elapsedMillis servo_test_timer = 0;
+  if (servo_test_timer > 2000) {
+    static uint8_t test_angle = 0;
+    UpdateSettingsFromLUTs((test_angle++)%180);
+    servo_test_timer = 0;
+  }
+  */
+  
   if (is_new_servo_pulse && servo_timer_ms > defaults::kServoDelayMs) {
     HandleServoPulse();
     servo_timer_ms = 0;
   }
   
-  // read the sensor value and filter it
   auto sensor_value = analogRead(defaults::kAnalogSensingPin);
   filtered_sensor_value =
       (1.f - sensor_settings.filter_weight) * filtered_sensor_value +
       sensor_settings.filter_weight * sensor_value;
+  static uint16_t last_triggered_sensor_val = filtered_sensor_value;
 
   // calculate the bin id depending on the filtered sensor value
   // (currently linear mapping)
   uint16_t mapped_bin_id = map(filtered_sensor_value, sensor_settings.min_value,
                                sensor_settings.max_value, 0,
                                signal_generator_settings.number_of_bins);
-
+  
   if (mapped_bin_id != last_bin_id) {
-    //! bin CHANGED
-
-    // ******* #1 Assign a pulse number *************************
-    if (mapped_bin_id > last_bin_id) {
-      new_pulse_id = mapped_bin_id;
-    } else {
-      new_pulse_id = mapped_bin_id;
+    auto dist = std::abs(filtered_sensor_value - last_triggered_sensor_val);
+    if (dist < defaults::kSensorJitterThreshold) {
+       return;
     }
-
-    // ******* #2 Check if Pulse is already vibrating *************************
-    // if its not vibrating, start a new pulse with a new ID
-    if (!is_vibrating) {
-      // current_pulse_id = new_pulse_id;
-    }
-
-    // ******* #3 Check if we have a new Pulse ID *************************
-    if (new_pulse_id == current_pulse_id) {
-      // don't do anything if its already vibrating
-      // with an existing pulse
-      // don't retrigger the same pulse!
-      //(this is probably not needed)
-    } else {
-      //! currently same pulses cannot retrigger at all
-      //! this is maybe too strict
-      current_pulse_id = new_pulse_id;
-      StartPulse();
-    }
-
-    last_bin_id = mapped_bin_id;
-  }
-
-  if (is_vibrating) {
-    if (pulse_time_us >= signal_generator_settings.duration_us) {
+    
+    if (is_vibrating) {
+#ifdef DEBUG
+      Serial.println(F(">>> Stop pulse before it finished"));
+#endif
       StopPulse();
+      delay(1);
     }
+    
+#ifdef DEBUG
+    Serial.printf(">>> Change bin \n\t bin id: %d\n", (int)mapped_bin_id);
+#endif
+    StartPulse();
+    last_bin_id = mapped_bin_id;
+    last_triggered_sensor_val = filtered_sensor_value;
   }
+
+  if (is_vibrating && pulse_time_us >= signal_generator_settings.duration_us) {
+    StopPulse();
+  }  
 }
