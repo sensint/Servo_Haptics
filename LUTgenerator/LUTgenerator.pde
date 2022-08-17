@@ -59,8 +59,8 @@ final float guiCircleSize2 = 8;
 final color guiStrokeColor = color(0);
 final color guiCanvasColor = color(255);
 final color guiBackgroundColor = color(102);
-final color guiFrequencyColor = color(50, 50, 255);
-final color guiBinColor = color(255, 50, 50);
+final color guiFrequencyColor = #25A199;
+final color guiBinColor = #D43683;
 
 final float xStep = guiCanvasWidth/maxDataIdx;
 
