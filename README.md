@@ -89,7 +89,7 @@ Download and install the [Teensyduino](https://www.pjrc.com/teensy/td_download.h
 
 ##### Build and Upload
 
-1. Open the `MotionCoupledVibrations.ino`
+1. Open the `HapticServo.ino`
     1. navigate in your file manager (Win: Explorer, macOS: Finder) to the repository's folder `firmware/Teensyduino/MotionCoupledVibrations` and then double-click the `ino` file
     2. use the Teensyduino menu (`File -> Open`) or the keyboard shortcut (Win: `Ctrl+O`, macOS: `Cmd+O`) and navigate to the repository's folder `firmware/Teensyduino/MotionCoupledVibrations` and then select the `ino` file
 2. connect the Teensy with your computer via USB
@@ -101,6 +101,9 @@ Download and install the [Teensyduino](https://www.pjrc.com/teensy/td_download.h
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
+##### Control
+
+The Haptic Servo is designed to be compatible with servo hardware and software. Using servo-commands you can fine-tune the tactile experience. You can find an example of how to do this in 'ServoControl.ino'
 
 
 #### PlatformIO
