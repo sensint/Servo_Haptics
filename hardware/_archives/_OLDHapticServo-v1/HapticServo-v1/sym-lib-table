@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name eec)(type Legacy)(uri "/Users/courtneyreed/Desktop/HapticServo/IC_Diodes Inc._PAM8403DR/eec.lib")(options "")(descr ""))
+  (lib (name teensy4.0_audioshield_revd)(type Legacy)(uri /Users/courtneyreed/Desktop/HapticServo/pjrc_REVD_Audio_Adaptor/teensy4.0_audioshield_revd.lib)(options "")(descr ""))
+  (lib (name teensy)(type Legacy)(uri /Users/courtneyreed/Desktop/HapticServo/teensy_library-master/teensy.lib)(options "")(descr ""))
+)
