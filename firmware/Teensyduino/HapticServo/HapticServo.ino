@@ -179,7 +179,7 @@ inline void SetupServo() __attribute__((always_inline));
 inline void StartPulse() __attribute__((always_inline));
 inline void StopPulse() __attribute__((always_inline));
 inline void HandleServoPulse() __attribute__((always_inline));
-inline void ApplyHardwareFix() __attribute__((always_inline));
+inline void HardwareFix() __attribute__((always_inline));
 void ServoPinChangingEdge();
 void UpdateSettingsFromLUTs(uint8_t index);
 void HandleI2COnReceive(int number_of_bytes);
@@ -321,6 +321,8 @@ void HandleI2COnReceive(int number_of_bytes) {
 }
 
 //! This should be removed for the next PCB version!
+//   Creating a virtual ground by making pin 2 LOW
+//   
 void ApplyHardwareFix() {
   pinMode(A2,OUTPUT);
   digitalWrite(A2, HIGH);
