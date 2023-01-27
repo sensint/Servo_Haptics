@@ -25,10 +25,10 @@
     <img src="assets/img/sensint_logo.png" alt="Logo" width="121" height="100">
   </a>
 
-<h3 align="center">Servo-Haptics - Motion Coupled Vibrations</h3>
+<h3 align="center">Haptic Servos - Motion Coupled Vibrations</h3>
 
   <p align="center">
-    Understanding and Creating Proximal Vibrotactile Experiences
+    Self-Contained Vibrotactile Rendering System for Creating or Augmenting Material Experiences
     <br />
     <br />
     <a href="https://github.com/sensint/Servo_Haptics/issues">Report Bug</a>
