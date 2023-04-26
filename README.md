@@ -30,7 +30,7 @@
   <p align="center">
     Self-Contained Vibrotactile Rendering System for Creating or Augmenting Material Experiences
     <br />
-    <b>We love to get your feedback and get in touch with you: https://forms.gle/Dh4iDR7DPDSnXZQTA</b>
+    <b>We'd love to get your feedback and get in touch with you: https://forms.gle/Dh4iDR7DPDSnXZQTA</b>
     <br />
     <br />
     <a href="https://github.com/sensint/Servo_Haptics/issues">Report Bug</a>
