@@ -1,3 +1,0 @@
-(sym_lib_table
-  (lib (name "HapticServo")(type "KiCad")(uri "${KIPRJMOD}/HapticServo.kicad_sym")(options "")(descr ""))
-)

@@ -1,5 +1,0 @@
-(fp_lib_table
-  (lib (name "HS-footprints")(type "KiCad")(uri "${KIPRJMOD}/HS-footprints")(options "")(descr ""))
-  (lib (name "JS202011CQN")(type "KiCad")(uri "${KIPRJMOD}/JS202011CQN")(options "")(descr ""))
-  (lib (name "3362P-1-503TLF")(type "KiCad")(uri "${KIPRJMOD}/HS-footprints/3362P-1-503TLF")(options "")(descr ""))
-)
